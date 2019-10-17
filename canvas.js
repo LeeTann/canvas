@@ -26,6 +26,29 @@ console.log(canvas)
 // context.strokeStyle = "#fa34a4"
 // context.stroke()
 
+// Create a mouse object
+let mouse = {
+  x: undefined,
+  y: undefined
+}
+
+let maxRadius = 40
+// let minRadius = 2
+
+window.addEventListener('mousemove',
+  function(event) {
+    mouse.x = event.x
+    mouse.y = event.y
+  })
+
+window.addEventListener('resize',
+  function() {
+    canvas.width = window.innerWidth
+    canvas.height = window.innerHeight
+
+    init()
+  })
+
 // Create a circle object
 function Circle(x, y, dx, dy, radius) {
   this.x = x
@@ -33,15 +56,22 @@ function Circle(x, y, dx, dy, radius) {
   this.dx = dx
   this.dy = dy
   this.radius = radius
+  this.minRadius = radius
+  let color = ['#BF99A7', '#586F8C', '#0E2940', '#F2CEAE', '#F2C1AE']
+  // let strokeColor = color[Math.floor(Math.random() * color.length)]
+  let fillColor = color[Math.floor(Math.random() * color.length)]
 
   this.draw = function() {
     context.beginPath() // beginPath() start a new drawing piece
     context.arc(this.x, this.y, this.radius, 0, Math.PI *2, false) // code for drawing circle
-    context.strokeStyle = "blue"
-    context.stroke() // stroke() draws to screen
+    // context.strokeStyle = strokeColor
+    // context.stroke() // stroke() draws to screen
+    context.fillStyle = fillColor
+    context.fill()
   }
 
   this.update = function() {
+    // contains the circles with canvas and bounce it around
     if (this.x + this.radius > innerWidth || this.x - this.radius < 0) {
       this.dx = -this.dx
     }
@@ -53,23 +83,37 @@ function Circle(x, y, dx, dy, radius) {
     this.x += this.dx
     this.y += this.dy
 
+    // interactivity
+    if (mouse.x - this.x < 50 && mouse.x - this.x > -50 
+      && mouse.y - this.y < 50 && mouse.y - this.y > -50) {
+        if (this.radius < maxRadius) {
+          this.radius += 1
+        }
+    } else if (this.radius > this.minRadius) {
+      this.radius -= 1
+    }
+
     this.draw()
   }
 }
 
 
-
 let circleArray = []
 
-for (let i = 0; i < 100; i++) {
-  // This generates a random circle
-  let radius = 30
-  let x = Math.random() * (innerWidth - radius *2) + radius
-  let y = Math.random() * (innerHeight - radius *2) + radius
-  let dx = (Math.random() -0.5) * 2 // x velocity
-  let dy = (Math.random() -0.5) * 2 // y velocity
+function init() {
+  // reset circle array each time init is called during resizing
+  circleArray = []
 
-  circleArray.push(new Circle(x, y, dx, dy, radius))
+  for (let i = 0; i < 200; i++) {
+    // This generates a random circle
+    let radius = Math.random() * 5 + 1
+    let x = Math.random() * (innerWidth - radius *2) + radius
+    let y = Math.random() * (innerHeight - radius *2) + radius
+    let dx = (Math.random() -0.5) * 2 // x velocity
+    let dy = (Math.random() -0.5) * 2 // y velocity
+  
+    circleArray.push(new Circle(x, y, dx, dy, radius))
+  }
 }
 
 // Create an animation function
@@ -82,6 +126,7 @@ function animate() {
   }
 }
 
+init()
 animate()
 
 // Creates random circles 
